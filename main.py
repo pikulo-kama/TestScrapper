@@ -1,15 +1,16 @@
 import os
+from pathlib import Path
 
-from abstract.xlsx import XLSXExporter
 from abstract.pdf import PDFParser
-from csvexporter import XLSXExporterImpl
+from abstract.xlsx import XLSXExporter
 from formatter import PDFFormatterImpl
 from mapper import DataEntryMapperImpl
 from parser import PDFParserImpl
 from service import DataEntryService
+from xlsxexporter import XLSXExporterImpl
 
-XLSX_EXPORT_FILE_PATH = "/tmp/export.xlsx"
-PDF_FILE_PATH = "/home/jeremiah/Downloads/Abstract_Book_from_the_5th_World_Psoriasis_and_Psoriatic_Arthritis.pdf"
+XLSX_EXPORT_FILE_PATH = "export.xlsx"
+PDF_FILE_PATH = "Abstract_Book_from_the_5th_World_Psoriasis_and_Psoriatic_Arthritis.pdf"
 CACHE_FILE_PATH = "cache/cached_content.txt"
 
 
@@ -46,8 +47,15 @@ class Main:
         self.__exporter.addRows(entries)
         self.__exporter.export()
 
+    @staticmethod
+    def createIfNotExists(filename: str):
+        filePath = "/".join(filename.split("/")[:-1])
+        Path(filePath).mkdir(parents=True, exist_ok=True)
+
 
 if __name__ == '__main__':
+    Main.createIfNotExists(CACHE_FILE_PATH)
+    Main.createIfNotExists(XLSX_EXPORT_FILE_PATH)
 
     exporter = XLSXExporterImpl(XLSX_EXPORT_FILE_PATH)
     dataEntryService = DataEntryService(DataEntryMapperImpl())

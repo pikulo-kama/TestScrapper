@@ -3,11 +3,15 @@ from typing import List
 from pdfplumber import open as pdfopen
 from pdfplumber.page import Page
 
-from abstract.pdf import PDFParser
+from abstract.pdf import PDFParser, PDFFormatter
 
 
 class PDFParserImpl(PDFParser):
     _pages: List[Page]
+    _pdfFormatter: PDFFormatter
+
+    def __init__(self, pdfFormatter: PDFFormatter) -> None:
+        self._pdfFormatter = pdfFormatter
 
     def parseDocument(self, documentPath: str) -> None:
         self._pages = pdfopen(documentPath).pages

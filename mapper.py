@@ -9,11 +9,9 @@ from models import PersonDetails, DataEntry
 
 
 class DataEntryMapperImpl(DataEntryMapper):
-    DATA_ENTRY_REGEX_PATTERN = re.compile("\n?(?P<sessionName>P\\d{3})\\s+" +
-                                          "(?P<topicTitle>[^a-z]*?)(?=[A-Z][a-zå])" +
-                                          "(?P<names>.+?[a-z0-9]\n)" +
-                                          "(?P<locations>.+?[a-zA-Z]\n)?" +
-                                          "(?P<abstract>.*)", flags=re.RegexFlag.S)
+    DATA_ENTRY_REGEX_PATTERN = re.compile("\n?(?P<sessionName>P\\d{3})\\s+(?P<topicTitle>[^a-z]*?)(?=[A-Z][a-zå])" +
+                                          "(?P<names>.+?[a-z0-9]\n)(?P<locations>.+?[a-zA-Z0-9]\n)?(?P<abstract>.*)",
+                                          flags=re.RegexFlag.S)
 
     def map(self, record: str) -> List[DataEntry]:
         """
@@ -42,9 +40,6 @@ class DataEntryMapperImpl(DataEntryMapper):
     @staticmethod
     def _buildGeneralDataEntry(match: Dict[str, str]) -> DataEntry:
 
-        def formatSessionName(sessionName):
-            return str(sessionName).strip()
-
         def formatTopicTitle(title: str):
             topicTitle = re.sub(r"\s+", " ", title)
             return re.sub(r"­\s", "", topicTitle).strip()
@@ -52,7 +47,7 @@ class DataEntryMapperImpl(DataEntryMapper):
         dataEntry = DataEntry()
 
         dataEntry.topicTitle = formatTopicTitle(match['topicTitle'])
-        dataEntry.sessionName = formatSessionName(match['sessionName'])
+        dataEntry.sessionName = match['sessionName'].strip()
         dataEntry.presentationAbstract = match['abstract']
 
         return dataEntry
@@ -61,14 +56,14 @@ class DataEntryMapperImpl(DataEntryMapper):
 
         personDetails = []
 
-        def formatName(_name: str):
-            return re.sub(r"-\n\d", "", _name.strip())
+        def formatText(_name: str):
+            return re.sub(r"\n|-\n|\d", "", _name.strip())
 
         if locations is None:
 
             for name in names.split(","):
                 details = PersonDetails()
-                details.name = formatName(name)
+                details.name = formatText(name)
 
                 personDetails.append(details)
 
@@ -98,9 +93,9 @@ class DataEntryMapperImpl(DataEntryMapper):
                     except KeyError:
                         details.affiliationName = ""
                 else:
-                    details.affiliationName = locations.strip()
+                    details.affiliationName = formatText(locations)
 
-                details.name = formatName(name)
+                details.name = formatText(name)
                 details.location = self._extractLocation([details.affiliationName, locations])
 
                 personDetails.append(details)
@@ -109,8 +104,8 @@ class DataEntryMapperImpl(DataEntryMapper):
 
             for name in names.split(","):
                 details = PersonDetails()
-                details.name = formatName(name)
-                details.location = self._extractLocation(["", locations])
+                details.name = formatText(name)
+                details.location = self._extractLocation([locations, ])
 
                 personDetails.append(details)
 

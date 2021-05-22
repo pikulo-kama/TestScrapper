@@ -1,5 +1,5 @@
-from typing import List
 from abc import ABC, abstractmethod
+from typing import List
 
 from models import DataEntry
 
@@ -19,11 +19,6 @@ class PDFFormatter(ABC):
 
 
 class PDFParser(ABC):
-
-    _pdfFormatter: PDFFormatter
-
-    def __init__(self, pdfFormatter: PDFFormatter) -> None:
-        self._pdfFormatter = pdfFormatter
 
     @abstractmethod
     def parseDocument(self, documentPath: str) -> bool:

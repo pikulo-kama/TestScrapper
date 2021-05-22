@@ -1,5 +1,6 @@
-import xlsxwriter
 from typing import List
+
+import xlsxwriter
 
 from abstract.xlsx import XLSXExporter
 from models import DataEntry
